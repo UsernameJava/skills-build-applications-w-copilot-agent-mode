@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from . import views
+import os
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
@@ -30,6 +31,18 @@ router.register(r'leaderboard', views.LeaderboardViewSet)
 
 @api_view(['GET'])
 def api_root(request, format=None):
+    # Prefer Codespace public URL when available, otherwise fall back to request host
+    codespace = os.environ.get('CODESPACE_NAME')
+    if codespace:
+        base = f"https://{codespace}-8000.app.github.dev/api/"
+        return Response({
+            'users': base + 'users/',
+            'teams': base + 'teams/',
+            'activities': base + 'activities/',
+            'workouts': base + 'workouts/',
+            'leaderboard': base + 'leaderboard/',
+        })
+
     return Response({
         'users': request.build_absolute_uri('users/'),
         'teams': request.build_absolute_uri('teams/'),
